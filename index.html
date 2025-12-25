@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    
+    <style>
+        :root {
+            --night: #050508;
+            --dark: #08080c;
+            --star: #e8e6e0;
+            --dim: #4a4a58;
+            --warm: #c4a882;
+            --text: #b8b6b0;
+            --faint: #3a3a44;
+        }
+        
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Cormorant Garamond', 'Garamond', 'Times New Roman', serif;
+            background: var(--night);
+            color: var(--text);
+            line-height: 1.9;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Hide scrollbar but allow scrolling */
+        body::-webkit-scrollbar { width: 0; }
+        body { scrollbar-width: none; }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+        
+        /* =========================================================
+           TYPOGRAPHY - Restrained, intimate
+           ========================================================= */
+        
+        .moment-date {
+            font-size: 0.65rem;
+            font-weight: 400;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 2.5rem;
+        }
+        
+        .moment-place {
+            font-size: 0.6rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-top: 0.4rem;
+        }
+        
+        p {
+            font-weight: 300;
+            font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+            color: var(--text);
+            max-width: 420px;
+            margin: 0 auto;
+        }
+        
+        p + p {
+            margin-top: 2rem;
+        }
+        
+        em {
+            font-style: italic;
+            color: var(--warm);
+        }
+        
+        .aside {
+            font-size: 0.85rem;
+            color: var(--dim);
+            font-style: italic;
+            margin-top: 3rem;
+        }
+        
+        /* Links - subtle, understated */
+        a.sky-link {
+            display: inline-block;
+            margin-top: 2.5rem;
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--faint);
+            text-decoration: none;
+            border-bottom: 1px solid var(--faint);
+            padding-bottom: 2px;
+            transition: color 0.4s ease, border-color 0.4s ease;
+        }
+        
+        a.sky-link:hover {
+            color: var(--dim);
+            border-color: var(--dim);
+        }
+        
+        /* =========================================================
+           LAYOUT
+           ========================================================= */
+        
+        section {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+        
+        .star-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1.6s ease, transform 1.6s ease;
+        }
+        
+        .content.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Hover to reveal sky */
+        .content.hoverable {
+            transition: opacity 0.5s ease, transform 1.6s ease;
+            cursor: default;
+        }
+        
+        .content.hoverable:hover {
+            opacity: 0.04;
+        }
+        
+        /* =========================================================
+           SHOOTING STAR
+           ========================================================= */
+        
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, var(--star) 30%, var(--star));
+            opacity: 0;
+            z-index: 5;
+            pointer-events: none;
+            filter: blur(0.2px);
+            transform-origin: left center;
+        }
+        
+        .shooting-star.animate {
+            animation: shoot 1.6s ease-out forwards;
+        }
+        
+        @keyframes shoot {
+            0% { opacity: 0; transform: translateX(0) translateY(0) rotate(35deg); }
+            10% { opacity: 0.9; }
+            80% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateX(300px) translateY(180px) rotate(35deg); }
+        }
+        
+        /* =========================================================
+           SECTIONS
+           ========================================================= */
+        
+        #opening {
+            min-height: 60vh;
+        }
+        
+        #halloween {
+            min-height: 110vh;
+        }
+        
+        #first-kiss {
+            min-height: 120vh;
+        }
+        
+        #official {
+            min-height: 110vh;
+        }
+        
+        #closing {
+            min-height: 40vh;
+        }
+        
+        #closing p {
+            color: var(--warm);
+            font-style: italic;
+        }
+        
+        /* =========================================================
+           HIDDEN STAR (Easter Egg)
+           ========================================================= */
+        
+        .hidden-star {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #f0e060;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 3s ease;
+            box-shadow: 
+                0 0 10px #f0e060,
+                0 0 20px #f0e060,
+                0 0 40px rgba(240, 224, 96, 0.6),
+                0 0 60px rgba(240, 224, 96, 0.4);
+            z-index: 100;
+            cursor: pointer;
+        }
+        
+        .hidden-star.revealed {
+            opacity: 1;
+        }
+        
+        .hidden-star::after {
+            content: attr(data-message);
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-style: italic;
+            color: #f0e060;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(240, 224, 96, 0.5);
+        }
+        
+        .hidden-star:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         OPENING
+         ========================================================= -->
+    <section id="opening">
+        <canvas class="star-canvas" id="opening-canvas"></canvas>
+        <div class="content">
+            <p>Some nights stay with you.</p>
+            <p>These are ours.</p>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         HALLOWEEN
+         ========================================================= -->
+    <section id="halloween">
+        <canvas class="star-canvas" id="halloween-canvas"></canvas>
+        <div class="shooting-star" id="shooting-star"></div>
+        
+        <div class="content hoverable">
+            <div class="moment-date">October 31 · 9:17 pm</div>
+            <div class="moment-place">Virginia Beach & Marlboro</div>
+            
+            <p style="margin-top: 3rem;">
+                Four hundred miles between your sky and mine.
+            </p>
+            
+            <p>
+                I watched a star fall and wondered if you saw it too.
+            </p>
+            
+            <p><em>You did.</em></p>
+            
+            <p class="aside">
+                Orion was rising in both skies that night.<br>
+                Betelgeuse glowing red on his shoulder.
+            </p>
+            
+            <a href="https://stellarium-web.org/skysource/Betelgeuse?fov=120&date=2024-10-31T21:17:00Z&lat=36.85&lng=-75.98&elev=0" 
+               target="_blank" 
+               rel="noopener" 
+               class="sky-link">
+                Sky map
+            </a>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         FIRST KISS
+         ========================================================= -->
+    <section id="first-kiss">
+        <canvas class="star-canvas" id="kiss-canvas"></canvas>
+        
+        <div class="hidden-star" id="hidden-star" data-message="You were worth the wait." style="top: 30%; left: 68%;"></div>
+        
+        <div class="content hoverable">
+            <div class="moment-date">November 19 · 10:27 pm</div>
+            <div class="moment-place">Keyport, New Jersey</div>
+            
+            <p style="margin-top: 3rem;">
+                Three weeks of distance. Then this.
+            </p>
+            
+            <p>
+                The air had that late-autumn cold—<br>
+                the kind that makes you stand closer.
+            </p>
+            
+            <p>
+                I didn't plan what happened next.<br>
+                <em>I just stopped waiting.</em>
+            </p>
+            
+            <p class="aside">
+                Vega was setting in the west.<br>
+                The Summer Triangle making its last bow before winter.
+            </p>
+            
+            <a href="https://stellarium-web.org/skysource/Vega?fov=120&date=2024-11-20T03:27:00Z&lat=40.44&lng=-74.21&elev=0" 
+               target="_blank" 
+               rel="noopener" 
+               class="sky-link">
+                Sky map
+            </a>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         OFFICIAL
+         ========================================================= -->
+    <section id="official">
+        <canvas class="star-canvas" id="official-canvas"></canvas>
+        
+        <div class="content hoverable">
+            <div class="moment-date">December 14 · 9:41 pm</div>
+            <div class="moment-place">Marlboro, New Jersey</div>
+            
+            <p style="margin-top: 3rem;">
+                Some men deliberate.<br>
+                Weigh options. Hedge bets.
+            </p>
+            
+            <p>
+                I just knew.
+            </p>
+            
+            <p>
+                <em>You were already mine.<br>
+                I was just making it official.</em>
+            </p>
+            
+            <p class="aside">
+                Orion was high overhead now.<br>
+                Sirius—the brightest star in the sky—had just risen.
+            </p>
+            
+            <a href="https://stellarium-web.org/skysource/Sirius?fov=120&date=2024-12-15T02:41:00Z&lat=40.34&lng=-74.25&elev=0" 
+               target="_blank" 
+               rel="noopener" 
+               class="sky-link">
+                Sky map
+            </a>
+        </div>
+    </section>
+
+    <!-- =========================================================
+         CLOSING
+         ========================================================= -->
+    <section id="closing">
+        <canvas class="star-canvas" id="closing-canvas"></canvas>
+        <div class="content">
+            <p>Every sky since has had you in it.</p>
+        </div>
+    </section>
+
+    <script>
+    /* =========================================================
+       MOMENT DATA
+       ========================================================= */
+    
+    const moments = {
+        halloween: {
+            date: new Date(2024, 9, 31, 21, 17),
+            lat: 36.8529,
+            lon: -75.9780
+        },
+        firstKiss: {
+            date: new Date(2024, 10, 19, 22, 27),
+            lat: 40.4376,
+            lon: -74.2057
+        },
+        official: {
+            date: new Date(2024, 11, 14, 21, 41),
+            lat: 40.3378,
+            lon: -74.2472
+        }
+    };
+    
+    /* =========================================================
+       STAR CATALOG (abbreviated for performance)
+       ========================================================= */
+    
+    const stars = [
+        ['Sirius', 6.752, -16.716, -1.46],
+        ['Canopus', 6.399, -52.696, -0.72],
+        ['Arcturus', 14.261, 19.182, -0.05],
+        ['Vega', 18.616, 38.784, 0.03],
+        ['Capella', 5.278, 45.998, 0.08],
+        ['Rigel', 5.242, -8.202, 0.13],
+        ['Procyon', 7.655, 5.225, 0.34],
+        ['Betelgeuse', 5.919, 7.407, 0.42],
+        ['Altair', 19.846, 8.868, 0.76],
+        ['Aldebaran', 4.599, 16.509, 0.85],
+        ['Antares', 16.490, -26.432, 0.96],
+        ['Spica', 13.420, -11.161, 0.97],
+        ['Pollux', 7.755, 28.026, 1.14],
+        ['Fomalhaut', 22.960, -29.622, 1.16],
+        ['Deneb', 20.690, 45.280, 1.25],
+        ['Regulus', 10.139, 11.967, 1.35],
+        ['Castor', 7.577, 31.888, 1.58],
+        ['Bellatrix', 5.419, 6.350, 1.64],
+        ['Alnilam', 5.603, -1.202, 1.69],
+        ['Alnitak', 5.679, -1.943, 1.77],
+        ['Saiph', 5.796, -9.670, 2.09],
+        ['Mintaka', 5.533, -0.299, 2.23],
+        ['Alioth', 12.900, 55.960, 1.77],
+        ['Dubhe', 11.062, 61.751, 1.79],
+        ['Alkaid', 13.792, 49.313, 1.86],
+        ['Mizar', 13.399, 54.925, 2.04],
+        ['Merak', 11.031, 56.382, 2.37],
+        ['Phecda', 11.897, 53.695, 2.44],
+        ['Polaris', 2.530, 89.264, 1.98],
+        ['Kochab', 14.845, 74.155, 2.08],
+        ['Schedar', 0.675, 56.537, 2.23],
+        ['Caph', 0.153, 59.150, 2.27],
+        ['Sadr', 20.370, 40.257, 2.20],
+        ['Denebola', 11.818, 14.572, 2.14],
+        ['Alhena', 6.629, 16.399, 1.93],
+        ['Elnath', 5.438, 28.608, 1.65],
+        ['Mirfak', 3.405, 49.861, 1.79],
+        ['Algol', 3.136, 40.957, 2.12],
+        ['Menkalinan', 5.992, 44.947, 1.90],
+        ['Enif', 21.736, 9.875, 2.39],
+        ['Scheat', 23.063, 28.083, 2.42],
+        ['Markab', 23.079, 15.205, 2.49],
+        ['Alpheratz', 0.140, 29.091, 2.06],
+        ['Mirach', 1.162, 35.620, 2.05],
+        ['Almach', 2.065, 42.330, 2.26],
+        ['Hamal', 2.120, 23.462, 2.00],
+        ['Diphda', 0.727, -17.987, 2.02],
+        ['Alphard', 9.460, -8.659, 1.98],
+        ['Adhara', 6.977, -28.972, 1.50],
+        ['Wezen', 7.140, -26.393, 1.84],
+        ['Mirzam', 6.378, -17.956, 1.98],
+        ['Kaus Australis', 18.403, -34.385, 1.85],
+        ['Nunki', 18.921, -26.297, 2.02],
+        ['Eltanin', 17.943, 51.489, 2.23],
+        ['Rasalhague', 17.582, 12.560, 2.07],
+        ['Alphecca', 15.578, 26.715, 2.23],
+    ];
+    
+    /* =========================================================
+       ASTRONOMY MATH
+       ========================================================= */
+    
+    function toJD(date) {
+        const y = date.getUTCFullYear();
+        const m = date.getUTCMonth() + 1;
+        const d = date.getUTCDate() + (date.getUTCHours() + date.getUTCMinutes()/60) / 24;
+        const a = Math.floor((14 - m) / 12);
+        const yy = y + 4800 - a;
+        const mm = m + 12 * a - 3;
+        return d + Math.floor((153*mm + 2)/5) + 365*yy + Math.floor(yy/4) - Math.floor(yy/100) + Math.floor(yy/400) - 32045;
+    }
+    
+    function gmst(jd) {
+        const T = (jd - 2451545.0) / 36525.0;
+        let g = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933*T*T;
+        return ((g % 360) + 360) % 360;
+    }
+    
+    function toAltAz(ra, dec, lst, lat) {
+        const r = ra * 15 * Math.PI/180;
+        const d = dec * Math.PI/180;
+        const l = lst * Math.PI/180;
+        const p = lat * Math.PI/180;
+        const ha = l - r;
+        const alt = Math.asin(Math.sin(d)*Math.sin(p) + Math.cos(d)*Math.cos(p)*Math.cos(ha));
+        const az = Math.atan2(-Math.sin(ha)*Math.cos(d), Math.sin(d)*Math.cos(p) - Math.cos(d)*Math.sin(p)*Math.cos(ha));
+        return { alt: alt*180/Math.PI, az: ((az*180/Math.PI) + 360) % 360 };
+    }
+    
+    function toCanvas(alt, az, w, h) {
+        if (alt < -5) return null;
+        const r = (90 - alt) / 95;
+        const t = (az - 180) * Math.PI/180;
+        return { x: w/2 + r*w*0.46*Math.sin(t), y: h/2 - r*h*0.46*Math.cos(t) };
+    }
+    
+    /* =========================================================
+       STAR FIELD
+       ========================================================= */
+    
+    class Sky {
+        constructor(canvas, moment) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext('2d');
+            this.moment = moment;
+            this.stars = [];
+            this.t = 0;
+            this.resize();
+            this.calculate();
+            window.addEventListener('resize', () => { this.resize(); this.calculate(); });
+            this.animate();
+        }
+        
+        resize() {
+            const r = this.canvas.parentElement.getBoundingClientRect();
+            const d = window.devicePixelRatio || 1;
+            this.canvas.width = r.width * d;
+            this.canvas.height = r.height * d;
+            this.canvas.style.width = r.width + 'px';
+            this.canvas.style.height = r.height + 'px';
+            this.ctx.setTransform(d, 0, 0, d, 0, 0);
+            this.w = r.width;
+            this.h = r.height;
+        }
+        
+        calculate() {
+            const jd = toJD(this.moment.date);
+            const lst = (gmst(jd) + this.moment.lon + 360) % 360;
+            this.stars = [];
+            for (const [n, ra, dec, mag] of stars) {
+                const {alt, az} = toAltAz(ra, dec, lst, this.moment.lat);
+                const pos = toCanvas(alt, az, this.w, this.h);
+                if (pos) {
+                    this.stars.push({
+                        ...pos,
+                        size: Math.max(0.6, 3.8 - mag * 0.5),
+                        opacity: Math.max(0.35, 1.1 - mag * 0.12),
+                        phase: Math.random() * Math.PI * 2,
+                        speed: 0.6 + Math.random() * 1.8
+                    });
+                }
+            }
+        }
+        
+        draw() {
+            this.ctx.clearRect(0, 0, this.w, this.h);
+            for (const s of this.stars) {
+                const tw = Math.sin(this.t * s.speed + s.phase);
+                const op = s.opacity * (1 + tw * 0.2);
+                const sz = s.size * (1 + tw * 0.06);
+                
+                // Glow
+                const g = this.ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, sz * 4);
+                g.addColorStop(0, `rgba(232, 230, 224, ${op * 0.2})`);
+                g.addColorStop(1, 'rgba(232, 230, 224, 0)');
+                this.ctx.fillStyle = g;
+                this.ctx.beginPath();
+                this.ctx.arc(s.x, s.y, sz * 4, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Core
+                this.ctx.fillStyle = `rgba(232, 230, 224, ${op})`;
+                this.ctx.beginPath();
+                this.ctx.arc(s.x, s.y, sz, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            this.t += 0.02;
+        }
+        
+        animate() {
+            this.draw();
+            requestAnimationFrame(() => this.animate());
+        }
+    }
+    
+    /* =========================================================
+       SPARSE SKY (for opening/closing)
+       ========================================================= */
+    
+    class SparseSky {
+        constructor(canvas, density = 0.00004) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext('2d');
+            this.density = density;
+            this.stars = [];
+            this.t = 0;
+            this.resize();
+            this.generate();
+            window.addEventListener('resize', () => { this.resize(); this.generate(); });
+            this.animate();
+        }
+        
+        resize() {
+            const r = this.canvas.parentElement.getBoundingClientRect();
+            const d = window.devicePixelRatio || 1;
+            this.canvas.width = r.width * d;
+            this.canvas.height = r.height * d;
+            this.canvas.style.width = r.width + 'px';
+            this.canvas.style.height = r.height + 'px';
+            this.ctx.setTransform(d, 0, 0, d, 0, 0);
+            this.w = r.width;
+            this.h = r.height;
+        }
+        
+        generate() {
+            const n = Math.floor(this.w * this.h * this.density);
+            this.stars = [];
+            for (let i = 0; i < n; i++) {
+                this.stars.push({
+                    x: Math.random() * this.w,
+                    y: Math.random() * this.h,
+                    size: 0.4 + Math.random() * 1.4,
+                    opacity: 0.25 + Math.random() * 0.5,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.4 + Math.random() * 1.2
+                });
+            }
+        }
+        
+        draw() {
+            this.ctx.clearRect(0, 0, this.w, this.h);
+            for (const s of this.stars) {
+                const tw = Math.sin(this.t * s.speed + s.phase);
+                const op = s.opacity * (1 + tw * 0.25);
+                
+                this.ctx.fillStyle = `rgba(232, 230, 224, ${op})`;
+                this.ctx.beginPath();
+                this.ctx.arc(s.x, s.y, s.size * (1 + tw * 0.08), 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            this.t += 0.018;
+        }
+        
+        animate() {
+            this.draw();
+            requestAnimationFrame(() => this.animate());
+        }
+    }
+    
+    /* =========================================================
+       INIT
+       ========================================================= */
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        new SparseSky(document.getElementById('opening-canvas'), 0.00003);
+        new Sky(document.getElementById('halloween-canvas'), moments.halloween);
+        new Sky(document.getElementById('kiss-canvas'), moments.firstKiss);
+        new Sky(document.getElementById('official-canvas'), moments.official);
+        new SparseSky(document.getElementById('closing-canvas'), 0.00002);
+        
+        // Scroll observer
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    const c = e.target.querySelector('.content');
+                    if (c) setTimeout(() => c.classList.add('visible'), 150);
+                    
+                    if (e.target.id === 'halloween') {
+                        setTimeout(shootStar, 2200);
+                    }
+                }
+            });
+        }, { threshold: 0.25 });
+        
+        document.querySelectorAll('section').forEach(s => obs.observe(s));
+        
+        // Show opening immediately
+        setTimeout(() => {
+            document.querySelector('#opening .content').classList.add('visible');
+        }, 400);
+        
+        // Hidden star easter egg
+        let reachedEnd = false;
+        const endObs = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) reachedEnd = true;
+        }, { threshold: 0.3 });
+        endObs.observe(document.getElementById('closing'));
+        
+        const kissObs = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && reachedEnd) {
+                setTimeout(() => document.getElementById('hidden-star').classList.add('revealed'), 1000);
+            }
+        }, { threshold: 0.4 });
+        kissObs.observe(document.getElementById('first-kiss'));
+    });
+    
+    function shootStar() {
+        const star = document.getElementById('shooting-star');
+        star.style.left = (5 + Math.random() * 20) + '%';
+        star.style.top = (5 + Math.random() * 12) + '%';
+        star.classList.add('animate');
+        setTimeout(() => { star.classList.remove('animate'); star.style.opacity = '0'; }, 1700);
+    }
+    </script>
+</body>
+</html>
